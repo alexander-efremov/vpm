@@ -6,27 +6,26 @@
 #include <cmath>
 
 // Host version of the Jacobi method
-void jacobiOnHost(double *x_next, double *A, double *x_now, double *b, int Ni, int Nj) {
+void jacobiOnHost(double *x_next, double *A, double *x_now, double *b, int nx, int ny) {
     float sigma;
-    for (int i = 0; i < Ni; i++) {
+    for (int i = 0; i < nx; i++) {
         sigma = 0.0;
-        for (int j = 0; j < Nj; j++) {
+        for (int j = 0; j < ny; j++) {
             if (i != j)
-                sigma += A[i * Nj + j] * x_now[j];
+                sigma += A[i * ny + j] * x_now[j];
         }
-        x_next[i] = (b[i] - sigma) / A[i * Nj + i];
+        x_next[i] = (b[i] - sigma) / A[i * ny + i];
     }
 }
 
-// device version of the Jacobi method
-__global__ void kernel(double *x_next, double *A, double *x_now, double *b, int Ni, int Nj) {
+__global__ void kernel(double *x_next, double *A, double *x_now, double *b, int nx, int ny) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < Ni) {
+    if (idx < nx) {
         float sigma = 0.0;
 
-        int idx_Ai = idx * Nj;
+        int idx_Ai = idx * ny;
 
-        for (int j = 0; j < Nj; j++)
+        for (int j = 0; j < ny; j++)
             if (idx != j)
                 sigma += A[idx_Ai + j] * x_now[j];
 
